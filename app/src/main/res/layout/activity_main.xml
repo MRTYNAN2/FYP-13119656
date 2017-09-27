@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.fyp.rory.fyp.Activitys.MainActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary">
+
+        <Button
+            android:id="@+id/logout_button"
+            android:text="Logout"
+            android:textColor="@color/white"
+            android:layout_gravity="start"
+            android:background="@color/colorPrimary"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
+
+        <TextView
+            android:gravity="center"
+            android:textSize="20sp"
+            android:id="@+id/toolbarTitle"
+            android:text="BookFace"
+            android:layout_gravity="center"
+            android:textColor="@color/white"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" />
+
+        <!--<Button-->
+        <!--android:id="@+id/map_button"-->
+        <!--android:layout_gravity="end"-->
+        <!--android:background="@drawable/tab_info"-->
+        <!--android:layout_width="30dp"-->
+        <!--android:layout_height="30dp"-->
+        <!--android:layout_marginRight="15dp"/>-->
+    </android.support.v7.widget.Toolbar>
+
+    <!--Rory Tynans registered app ids and has permission to dislpay this facebook page-->
+    <!--Dog House Page Id 431723036970590-->
+    <!--this apps ID 141234836479855-->
+    <!--app secret 6349fbc7a8df366e1e14190b3500d080-->
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_below="@+id/toolbar"
+        android:id="@+id/facebook_recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</RelativeLayout>
