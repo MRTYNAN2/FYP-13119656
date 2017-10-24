@@ -138,14 +138,12 @@ public class MainActivity extends AppCompatActivity {
                                                     if (message != null && !message.isJsonNull() && message.getAsString() != null && !message.getAsString().isEmpty()
                                                             && link != null && !link.isJsonNull() && link.getAsString() != null && !link.getAsString().isEmpty()
                                                             && createdTime != null && !createdTime.isJsonNull() && createdTime.getAsString() != null && !createdTime.getAsString().isEmpty()) {
-                                                        if (obj.has("source") && obj.has("full_picture"))
+                                                        if (fullPicture != null && video_source != null)
                                                             updates.add(new UserFacebookPost(id.getAsString(), link.getAsString(), fullPicture.getAsString(), message.getAsString(), createdTime.getAsString(), video_source.getAsString()));
-                                                        else if (!obj.has("source") && obj.has("full_picture"))
+                                                        else if (video_source == null && fullPicture.getAsString() != null)
                                                             updates.add(new UserFacebookPost(id.getAsString(), link.getAsString(), fullPicture.getAsString(), message.getAsString(), createdTime.getAsString(), "null"));
-                                                        if (!obj.has("source") && !obj.has("full_picture"))
-                                                            updates.add(new UserFacebookPost(id.getAsString(), link.getAsString(), "null", message.getAsString(), createdTime.getAsString(), "null"));
                                                         else
-                                                            updates.add(new UserFacebookPost(id.getAsString(), link.getAsString(), fullPicture.getAsString(), message.getAsString(), createdTime.getAsString(), "null"));
+                                                            updates.add(new UserFacebookPost(id.getAsString(), link.getAsString(), "null", message.getAsString(), createdTime.getAsString(), "null"));
                                                     }
                                                 }
                                             }

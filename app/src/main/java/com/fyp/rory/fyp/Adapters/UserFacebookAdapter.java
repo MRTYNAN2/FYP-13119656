@@ -58,10 +58,13 @@ public class UserFacebookAdapter extends RecyclerView.Adapter<UserFacebookAdapte
     public void onBindViewHolder(final ViewHolder holder, int position) {
         final UserFacebookPost post = mItems.get(position);
         //this gets Picasso to handle grabbing the profile picture of the facebook account
-        if (faceBookPageID != null)
-        Picasso.with(mContext)
-                .load("https://graph.facebook.com/me/picture?type=normal")
-                .into(holder.oProfileImage);
+        if (faceBookPageID != null) {
+            Picasso.with(mContext)
+                    .load("https://graph.facebook.com/me/picture?type=normal")
+                    .into(holder.oProfileImage);
+        } else {
+            holder.oProfileImage.setVisibility(View.GONE);
+        }
         // there is not call for user name hardcoded above
         if (facebookName != null)
         holder.oPageTitle.setText(facebookName);
@@ -94,7 +97,7 @@ public class UserFacebookAdapter extends RecyclerView.Adapter<UserFacebookAdapte
 
         }
         // post without images are ignored but just in case. again simple on click on image to go to link.
-        if (!post.getPicture().isEmpty()) {
+        if (!post.getPicture().equalsIgnoreCase("null")) {
             Picasso.with(mContext).load(post.getPicture()).fit().centerCrop().into(holder.oImageView);
             holder.oImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
