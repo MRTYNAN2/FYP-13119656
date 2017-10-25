@@ -58,18 +58,12 @@ public class UserFacebookAdapter extends RecyclerView.Adapter<UserFacebookAdapte
     public void onBindViewHolder(final ViewHolder holder, int position) {
         final UserFacebookPost post = mItems.get(position);
         //this gets Picasso to handle grabbing the profile picture of the facebook account
-        if (faceBookPageID != null) {
-            Picasso.with(mContext)
-                    .load("https://graph.facebook.com/me/picture?type=normal")
-                    .into(holder.oProfileImage);
-        } else {
-            holder.oProfileImage.setVisibility(View.GONE);
-        }
-        // there is not call for user name hardcoded above
-        if (facebookName != null)
-        holder.oPageTitle.setText(facebookName);
-        else
-            holder.oPageTitle.setVisibility(View.GONE);
+
+        holder.oProfileImage.setVisibility(View.GONE);
+
+        // there is no call for user name hardcoded above
+
+        holder.oPageTitle.setText(post.getmName());
 
         //facebook cuts out long text at 9 lines so In xml I have set to 8
         //text will be clickable to expand to show full text

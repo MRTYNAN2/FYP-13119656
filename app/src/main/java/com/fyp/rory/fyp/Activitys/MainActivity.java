@@ -21,6 +21,8 @@ import com.fyp.rory.fyp.Adapters.UserFacebookAdapter;
 import com.fyp.rory.fyp.Models.UserFacebookPost;
 import com.fyp.rory.fyp.Models.UserFriendsID;
 import com.fyp.rory.fyp.R;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -38,10 +40,20 @@ public class MainActivity extends AppCompatActivity {
     private UserFacebookAdapter mRecyclerAdapter;
     private RecyclerView mRecyclerView;
 
+    private String friendName = "";
+    private int testI = 0;
+    private String testUserID = "";
+
+    private FirebaseDatabase database;
+    private DatabaseReference myRef;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        database = FirebaseDatabase.getInstance();
+        myRef = database.getReference("users");
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -85,10 +97,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getFriendsPost(){
-        for (int i = 0; i <friendsList.size() ; i++) {
+        if (testI < friendsList.size()) {
+            friendName = friendsList.get(testI).getName();
+            testUserID = "";
+            testUserID = friendsList.get(testI).getID();
             new GraphRequest(
                     AccessToken.getCurrentAccessToken(),
-                    "/"+friendsList.get(i).getID()+"/posts?fields=link,full_picture,source,message,is_hidden,created_time&limit=20&access_token=",
+                    "/"+friendsList.get(testI).getID()+"/posts?fields=link,full_picture,source,message,is_hidden,created_time&access_token=",
                     null,
                     HttpMethod.GET,
                     new GraphRequest.Callback() {
@@ -134,17 +149,27 @@ public class MainActivity extends AppCompatActivity {
                                                         video_source = null;
                                                     }
 
-
+                                                    UserFacebookPost post;
                                                     if (message != null && !message.isJsonNull() && message.getAsString() != null && !message.getAsString().isEmpty()
                                                             && link != null && !link.isJsonNull() && link.getAsString() != null && !link.getAsString().isEmpty()
                                                             && createdTime != null && !createdTime.isJsonNull() && createdTime.getAsString() != null && !createdTime.getAsString().isEmpty()) {
-                                                        if (fullPicture != null && video_source != null)
-                                                            updates.add(new UserFacebookPost(id.getAsString(), link.getAsString(), fullPicture.getAsString(), message.getAsString(), createdTime.getAsString(), video_source.getAsString()));
-                                                        else if (video_source == null && fullPicture.getAsString() != null)
-                                                            updates.add(new UserFacebookPost(id.getAsString(), link.getAsString(), fullPicture.getAsString(), message.getAsString(), createdTime.getAsString(), "null"));
-                                                        else
-                                                            updates.add(new UserFacebookPost(id.getAsString(), link.getAsString(), "null", message.getAsString(), createdTime.getAsString(), "null"));
-                                                    }
+                                                        if (fullPicture != null && video_source != null) {
+                                                            post = new UserFacebookPost(friendName, id.getAsString(), link.getAsString(), fullPicture.getAsString(), message.getAsString(), createdTime.getAsString(), video_source.getAsString());
+                                                            myRef.child(testUserID).child(post.getmID()).setValue(post);
+                                                            updates.add(post);
+                                                        }
+                                                        else if (video_source == null && fullPicture.getAsString() != null) {
+                                                            post = new UserFacebookPost(friendName, id.getAsString(), link.getAsString(), fullPicture.getAsString(), message.getAsString(), createdTime.getAsString(), "null");
+                                                            myRef.child(testUserID).child(post.getmID()).setValue(post);
+                                                            updates.add(post);
+                                                        }
+                                                        else {
+                                                            post = new UserFacebookPost(friendName, id.getAsString(), link.getAsString(), "null", message.getAsString(), createdTime.getAsString(), "null");
+                                                            myRef.child(testUserID).child(post.getmID()).setValue(post);
+                                                            updates.add(post);
+                                                          }
+                                                        }
+
                                                 }
                                             }
                                             mRecyclerAdapter.updateDataset(updates);
@@ -152,6 +177,8 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                 }
                             }
+                            testI++;
+                            getFriendsPost();
                         }
                     }
             ).executeAsync();
