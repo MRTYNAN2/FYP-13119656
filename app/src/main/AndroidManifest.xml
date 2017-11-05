@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.fyp.rory.fyp">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -19,10 +19,14 @@
             </intent-filter>
         </activity>
         <activity android:name=".Activitys.MainActivity" />
-        <activity android:name=".Activitys.Login_Activity"></activity>
+        <activity android:name=".Activitys.Login_Activity" />
 
-        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
 
+        <activity android:name=".Activitys.Friend_List_Activity" />
+        <activity android:name=".Activitys.Single_Friend_Search"></activity>
     </application>
 
 </manifest>

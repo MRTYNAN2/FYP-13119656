@@ -18,6 +18,7 @@ import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
 import com.fyp.rory.fyp.Adapters.UserFacebookAdapter;
+import com.fyp.rory.fyp.Models.FriendList;
 import com.fyp.rory.fyp.Models.UserFacebookPost;
 import com.fyp.rory.fyp.Models.UserFriendsID;
 import com.fyp.rory.fyp.R;
@@ -60,6 +61,15 @@ public class MainActivity extends AppCompatActivity {
             actionBar.hide();
         }
 
+        Button friends = (Button)findViewById(R.id.friendsList);
+        friends.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent mainIntent = new Intent(MainActivity.this, Friend_List_Activity.class);
+                MainActivity.this.startActivity(mainIntent);
+            }
+        });
+
         mRecyclerView = (RecyclerView) findViewById(R.id.facebook_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
@@ -97,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getFriendsPost(){
+        friendsList = FriendList.getInstance().getFriendsList();
         if (testI < friendsList.size()) {
             friendName = friendsList.get(testI).getName();
             testUserID = "";
@@ -131,7 +142,12 @@ public class MainActivity extends AppCompatActivity {
                                                 if (object != null && object.isJsonObject() && !object.isJsonNull()) {
                                                     JsonObject obj = object.getAsJsonObject();
                                                     JsonElement id = obj.get("id");
-                                                    JsonElement link = obj.get("link");
+                                                    JsonElement link;
+                                                    if (obj.has("link")) {
+                                                        link = obj.get("link");
+                                                    } else {
+                                                        link = null;
+                                                    }
                                                     JsonElement fullPicture;
                                                     if (obj.has("full_picture")) {
                                                         fullPicture = obj.get("full_picture");
@@ -151,25 +167,23 @@ public class MainActivity extends AppCompatActivity {
 
                                                     UserFacebookPost post;
                                                     if (message != null && !message.isJsonNull() && message.getAsString() != null && !message.getAsString().isEmpty()
-                                                            && link != null && !link.isJsonNull() && link.getAsString() != null && !link.getAsString().isEmpty()
                                                             && createdTime != null && !createdTime.isJsonNull() && createdTime.getAsString() != null && !createdTime.getAsString().isEmpty()) {
-                                                        if (fullPicture != null && video_source != null) {
+                                                        if (fullPicture != null && video_source != null && link != null) {
                                                             post = new UserFacebookPost(friendName, id.getAsString(), link.getAsString(), fullPicture.getAsString(), message.getAsString(), createdTime.getAsString(), video_source.getAsString());
                                                             myRef.child(testUserID).child(post.getmID()).setValue(post);
                                                             updates.add(post);
                                                         }
-                                                        else if (video_source == null && fullPicture.getAsString() != null) {
+                                                        else if (video_source == null && fullPicture != null && link != null) {
                                                             post = new UserFacebookPost(friendName, id.getAsString(), link.getAsString(), fullPicture.getAsString(), message.getAsString(), createdTime.getAsString(), "null");
                                                             myRef.child(testUserID).child(post.getmID()).setValue(post);
                                                             updates.add(post);
                                                         }
                                                         else {
-                                                            post = new UserFacebookPost(friendName, id.getAsString(), link.getAsString(), "null", message.getAsString(), createdTime.getAsString(), "null");
+                                                            post = new UserFacebookPost(friendName, id.getAsString(), "noLink", "null", message.getAsString(), createdTime.getAsString(), "null");
                                                             myRef.child(testUserID).child(post.getmID()).setValue(post);
                                                             updates.add(post);
                                                           }
                                                         }
-
                                                 }
                                             }
                                             mRecyclerAdapter.updateDataset(updates);
@@ -207,7 +221,8 @@ public class MainActivity extends AppCompatActivity {
 
 
                                     UserFriendsID friend = new UserFriendsID(id.getAsString(),name.getAsString());
-                                    friendsList.add(friend);
+                                    FriendList.getInstance().addUser(friend);
+                                    //friendsList.add(friend);
                                 }
                             }
                         }
