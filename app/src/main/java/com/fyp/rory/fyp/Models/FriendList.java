@@ -26,6 +26,15 @@ public class FriendList {
         myFriend.add(friend);
     }
 
+    public UserFriendsID getSingleFriend(String name){
+        for (int i = 0 ; i < myFriend.size();i++){
+            if (myFriend.get(i).getName().equalsIgnoreCase(name)){
+                return myFriend.get(i);
+            }
+        }
+        return null;
+    }
+
     public ArrayList<UserFriendsID> getFriendsList(){
         return myFriend;
     }

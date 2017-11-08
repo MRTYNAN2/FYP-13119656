@@ -58,9 +58,11 @@ public class UserFacebookAdapter extends RecyclerView.Adapter<UserFacebookAdapte
     public void onBindViewHolder(final ViewHolder holder, int position) {
         final UserFacebookPost post = mItems.get(position);
         //this gets Picasso to handle grabbing the profile picture of the facebook account
-
-        holder.oProfileImage.setVisibility(View.GONE);
-
+        //if (!post.getmProfileImage().equalsIgnoreCase("null")){
+            Picasso.with(mContext).load(post.getmProfileImage()).fit().centerCrop().into(holder.oProfileImage);
+//        }else {
+//            holder.oProfileImage.setVisibility(View.GONE);
+//        }
         // there is no call for user name hardcoded above
 
         holder.oPageTitle.setText(post.getmName());
@@ -93,6 +95,7 @@ public class UserFacebookAdapter extends RecyclerView.Adapter<UserFacebookAdapte
         // post without images are ignored but just in case. again simple on click on image to go to link.
         if (!post.getPicture().equalsIgnoreCase("null")) {
             Picasso.with(mContext).load(post.getPicture()).fit().centerCrop().into(holder.oImageView);
+
             holder.oImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -123,11 +126,11 @@ public class UserFacebookAdapter extends RecyclerView.Adapter<UserFacebookAdapte
         if (stringDate != null)
             holder.oDateTextView.setText(finalDate);
 
-        //this is the top of the screen (profile pic, Name , date) same click on go to link
+      //  this is the top of the screen (profile pic, Name , date) same click on go to link
         holder.oWrapper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!post.getLink().isEmpty()) {
+                if (!post.getLink().equalsIgnoreCase("nolink")) {
                     Intent i = new Intent(Intent.ACTION_VIEW);
                     i.setData(Uri.parse(post.getLink()));
                     mContext.startActivity(i);

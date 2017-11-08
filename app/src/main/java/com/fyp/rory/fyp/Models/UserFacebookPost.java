@@ -2,6 +2,8 @@ package com.fyp.rory.fyp.Models;
 
 public class UserFacebookPost
 {
+    public UserFacebookPost(){}
+
     public String getmName() {
         return mName;
     }
@@ -11,6 +13,7 @@ public class UserFacebookPost
     }
 
     private String mName;
+    private String mProfileImage;
     private String mID;
     private String mLink;
     private String mPicture;
@@ -18,9 +21,10 @@ public class UserFacebookPost
     private String mTimeCreated;
     private String mVideoSource;
 
-    public UserFacebookPost(String name, String id, String link, String picture, String message, String timeCreated, String videoSoucre)
+    public UserFacebookPost(String name, String profileImage, String id, String link, String picture, String message, String timeCreated, String videoSoucre)
     {
         mName = name;
+        mProfileImage = profileImage;
         mID = id;
         mLink = link;
         mPicture = picture;
@@ -87,5 +91,13 @@ public class UserFacebookPost
 
     public void setmID(String mID) {
         this.mID = mID;
+    }
+
+    public String getmProfileImage() {
+        return mProfileImage;
+    }
+
+    public void setmProfileImage(String mProfileImage) {
+        this.mProfileImage = mProfileImage;
     }
 }

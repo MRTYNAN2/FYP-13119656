@@ -5,6 +5,8 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:focusable="true"
+    android:focusableInTouchMode="true"
     tools:context="com.fyp.rory.fyp.Activitys.Friend_List_Activity">
 
     <android.support.v7.widget.Toolbar
@@ -12,33 +14,40 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/colorPrimary">
+        <LinearLayout
+            android:layout_margin="2dp"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+    <EditText
+        android:layout_weight="0.8"
+        android:layout_margin="2dp"
+        android:gravity="center"
+        android:textSize="20sp"
+        android:id="@+id/searchbar"
+        android:hint="@string/search"
+        android:textColor="@color/white"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
-        <!--<Button-->
-            <!--android:id="@+id/logout_button"-->
-            <!--android:text="Logout"-->
-            <!--android:textColor="@color/white"-->
-            <!--android:layout_gravity="start"-->
-            <!--android:background="@color/colorPrimary"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="match_parent" />-->
+    <Button
+        android:layout_weight="0.2"
+        android:id="@+id/voice_button"
+        android:text="@string/voice"
+        android:textColor="@color/white"
+        android:background="@color/colorPrimary"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent" />
 
-        <TextView
-            android:gravity="center"
-            android:textSize="20sp"
-            android:id="@+id/toolbarTitle"
-            android:text="Friends List"
-            android:layout_gravity="center"
-            android:textColor="@color/white"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent" />
-
-        <!--<Button-->
-        <!--android:id="@+id/map_button"-->
-        <!--android:layout_gravity="end"-->
-        <!--android:background="@drawable/tab_info"-->
-        <!--android:layout_width="30dp"-->
-        <!--android:layout_height="30dp"-->
-        <!--android:layout_marginRight="15dp"/>-->
+    <Button
+        android:layout_weight="0.2"
+        android:id="@+id/search"
+        android:text="Search"
+        android:textColor="@color/white"
+        android:background="@color/colorPrimary"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent" />
+</LinearLayout>
     </android.support.v7.widget.Toolbar>
 
     <android.support.v7.widget.RecyclerView

@@ -3,4 +3,6 @@
 
     <string name="facebook_app_id">471460689891928</string>
     <string name="fb_login_protocol_scheme">fb141234836479855</string>
+    <string name="search">Search....</string>
+    <string name="voice">Voice</string>
 </resources>

@@ -1,16 +1,23 @@
 package com.fyp.rory.fyp.Activitys;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
@@ -22,8 +29,11 @@ import com.fyp.rory.fyp.Models.FriendList;
 import com.fyp.rory.fyp.Models.UserFacebookPost;
 import com.fyp.rory.fyp.Models.UserFriendsID;
 import com.fyp.rory.fyp.R;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -42,16 +52,77 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
 
     private String friendName = "";
+    private String friendProfileUrl = "";
     private int testI = 0;
     private String testUserID = "";
 
     private FirebaseDatabase database;
     private DatabaseReference myRef;
 
+    private EditText searchBar;
+    private Button search;
+
+    private List <UserFacebookPost> wordsList = new ArrayList<>();
+
+    private static final int REQUEST_CODE = 1234;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        searchBar = (EditText) findViewById(R.id.searchbar);
+        searchBar.addTextChangedListener(new TextWatcher() {
+
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (editable.toString().equalsIgnoreCase("")){
+                    mRecyclerAdapter.updateDataset(updates);
+                } else {
+                    specificSearch(searchBar.getText().toString());
+                }
+            }
+        });
+
+        Button speakButton = (Button) findViewById(R.id.voiceSearch);
+        speakButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startVoiceRecognitionActivity();
+            }
+        });
+
+        // Disable button if no recognition service is present
+        PackageManager pm = getPackageManager();
+        List<ResolveInfo> activities = pm.queryIntentActivities(
+                new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH), 0);
+        if (activities.size() == 0)
+        {
+            speakButton.setEnabled(false);
+            speakButton.setText("Recognizer not present");
+        }
+
+        search = (Button)findViewById(R.id.search);
+        search.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String check =searchBar.getText().toString();
+                if (!check.equalsIgnoreCase("")){
+                    specificSearch(searchBar.getText().toString());
+                } else {
+                    Toast.makeText(MainActivity.this, "Please enter text",
+                            Toast.LENGTH_LONG).show();
+                }
+            }
+        });
 
         database = FirebaseDatabase.getInstance();
         myRef = database.getReference("users");
@@ -79,17 +150,6 @@ public class MainActivity extends AppCompatActivity {
 
         mRecyclerView.setAdapter(mRecyclerAdapter);
 
-//        new GraphRequest(
-//                AccessToken.getCurrentAccessToken(),"/me/friends ",null,HttpMethod.GET,new GraphRequest.Callback(){
-//            @Override
-//            public void onCompleted(GraphResponse response) {
-//                if (response != null) {
-//                    String responseStr = response.getJSONObject().toString();
-//                }
-//            }
-//        }
-//        ).executeAsync();
-
         getFriends();
 
         logout = (Button)findViewById(R.id.logout_button);
@@ -110,6 +170,7 @@ public class MainActivity extends AppCompatActivity {
         friendsList = FriendList.getInstance().getFriendsList();
         if (testI < friendsList.size()) {
             friendName = friendsList.get(testI).getName();
+            friendProfileUrl = friendsList.get(testI).getProfileImage();
             testUserID = "";
             testUserID = friendsList.get(testI).getID();
             new GraphRequest(
@@ -169,17 +230,17 @@ public class MainActivity extends AppCompatActivity {
                                                     if (message != null && !message.isJsonNull() && message.getAsString() != null && !message.getAsString().isEmpty()
                                                             && createdTime != null && !createdTime.isJsonNull() && createdTime.getAsString() != null && !createdTime.getAsString().isEmpty()) {
                                                         if (fullPicture != null && video_source != null && link != null) {
-                                                            post = new UserFacebookPost(friendName, id.getAsString(), link.getAsString(), fullPicture.getAsString(), message.getAsString(), createdTime.getAsString(), video_source.getAsString());
+                                                            post = new UserFacebookPost(friendName,friendProfileUrl, id.getAsString(), link.getAsString(), fullPicture.getAsString(), message.getAsString(), createdTime.getAsString(), video_source.getAsString());
                                                             myRef.child(testUserID).child(post.getmID()).setValue(post);
                                                             updates.add(post);
                                                         }
-                                                        else if (video_source == null && fullPicture != null && link != null) {
-                                                            post = new UserFacebookPost(friendName, id.getAsString(), link.getAsString(), fullPicture.getAsString(), message.getAsString(), createdTime.getAsString(), "null");
+                                                        else if (fullPicture != null) {
+                                                            post = new UserFacebookPost(friendName,friendProfileUrl, id.getAsString(), link.getAsString(), fullPicture.getAsString(), message.getAsString(), createdTime.getAsString(), "null");
                                                             myRef.child(testUserID).child(post.getmID()).setValue(post);
                                                             updates.add(post);
                                                         }
                                                         else {
-                                                            post = new UserFacebookPost(friendName, id.getAsString(), "noLink", "null", message.getAsString(), createdTime.getAsString(), "null");
+                                                            post = new UserFacebookPost(friendName,friendProfileUrl, id.getAsString(), "noLink", "null", message.getAsString(), createdTime.getAsString(), "null");
                                                             myRef.child(testUserID).child(post.getmID()).setValue(post);
                                                             updates.add(post);
                                                           }
@@ -219,7 +280,6 @@ public class MainActivity extends AppCompatActivity {
                                     JsonElement id = obj.get("id");
                                     JsonElement name = obj.get("name");
 
-
                                     UserFriendsID friend = new UserFriendsID(id.getAsString(),name.getAsString());
                                     FriendList.getInstance().addUser(friend);
                                     //friendsList.add(friend);
@@ -233,5 +293,60 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         ).executeAsync();
+    }
+
+    private void specificSearch(final String s) {
+        ArrayList<UserFriendsID> allFriends = FriendList.getInstance().getFriendsList();
+        for (int i = 0 ; i < allFriends.size(); i++) {
+            DatabaseReference ref = database.getReference("users/" + allFriends.get(i).getID());
+            wordsList.clear();
+            ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for (DataSnapshot zoneSnapshot : dataSnapshot.getChildren()) {
+                        UserFacebookPost post = zoneSnapshot.getValue(UserFacebookPost.class);
+                        if (post.getMessage().toLowerCase().contains(s.toLowerCase())) {
+                            wordsList.add(post);
+                        }
+                    }
+                    mRecyclerAdapter.updateDataset(wordsList);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    System.out.println("The read failed: " + databaseError.getCode());
+                }
+            });
+        }
+    }
+
+    private void startVoiceRecognitionActivity()
+    {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Say what your looking for...");
+        intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS,1);
+        startActivityForResult(intent, REQUEST_CODE);
+    }
+
+    /**
+     * Handle the results from the voice recognition activity.
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if (requestCode == REQUEST_CODE && resultCode == RESULT_OK)
+        {
+            // Populate the wordsList with the String values the recognition engine thought it heard
+            ArrayList<String> matches = data.getStringArrayListExtra(
+                    RecognizerIntent.EXTRA_RESULTS);
+            String test = "";
+            for (int i = 0 ; i < matches.size();i++){
+                test += matches.get(i)+" ";
+            }
+            searchBar.setText(test);
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }
