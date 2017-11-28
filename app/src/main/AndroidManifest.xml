@@ -26,7 +26,8 @@
             android:value="@string/facebook_app_id" />
 
         <activity android:name=".Activitys.Friend_List_Activity" />
-        <activity android:name=".Activitys.Single_Friend_Search"></activity>
+        <activity android:name=".Activitys.Single_Friend_Search" />
+        <activity android:name=".Activitys.User_Post_by_Graph"></activity>
     </application>
 
 </manifest>

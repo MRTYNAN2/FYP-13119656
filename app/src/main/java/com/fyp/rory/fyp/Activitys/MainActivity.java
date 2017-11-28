@@ -62,6 +62,8 @@ public class MainActivity extends AppCompatActivity {
     private EditText searchBar;
     private Button search;
 
+    private String likesPostCalls =  "reactions.type(LIKE).limit(0).summary(1).as(like)?,reactions.type(LOVE).limit(0).summary(1).as(love)?,reactions.type(HAHA).limit(0).summary(1).as(haha)?,reactions.type(WOW).limit(0).summary(1).as(wow)?,reactions.type(SAD).limit(0).summary(1).as(sad)?,reactions.type(ANGRY).limit(0).summary(1).as(angry)";
+
     private List <UserFacebookPost> wordsList = new ArrayList<>();
 
     private static final int REQUEST_CODE = 1234;
@@ -132,6 +134,15 @@ public class MainActivity extends AppCompatActivity {
             actionBar.hide();
         }
 
+        Button postGraph = (Button)findViewById(R.id.post_button);
+        postGraph.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent mainIntent = new Intent(MainActivity.this, User_Post_by_Graph.class);
+                MainActivity.this.startActivity(mainIntent);
+            }
+        });
+
         Button friends = (Button)findViewById(R.id.friendsList);
         friends.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -166,6 +177,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+
+
+
     public void getFriendsPost(){
         friendsList = FriendList.getInstance().getFriendsList();
         if (testI < friendsList.size()) {
@@ -175,7 +189,7 @@ public class MainActivity extends AppCompatActivity {
             testUserID = friendsList.get(testI).getID();
             new GraphRequest(
                     AccessToken.getCurrentAccessToken(),
-                    "/"+friendsList.get(testI).getID()+"/posts?fields=link,full_picture,source,message,is_hidden,created_time&access_token=",
+                    "/"+friendsList.get(testI).getID()+"/posts?fields=link,full_picture,source,message,is_hidden,reactions,created_time&access_token=",
                     null,
                     HttpMethod.GET,
                     new GraphRequest.Callback() {
