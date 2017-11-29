@@ -20,8 +20,9 @@ public class UserFacebookPost
     private String mMessage;
     private String mTimeCreated;
     private String mVideoSource;
+    private FBReactions mReactions;
 
-    public UserFacebookPost(String name, String profileImage, String id, String link, String picture, String message, String timeCreated, String videoSoucre)
+    public UserFacebookPost(String name, String profileImage, String id, String link, String picture, String message, String timeCreated, String videoSoucre, FBReactions reactions)
     {
         mName = name;
         mProfileImage = profileImage;
@@ -31,6 +32,7 @@ public class UserFacebookPost
         mMessage = message;
         mTimeCreated = timeCreated;
         mVideoSource = videoSoucre;
+        mReactions = reactions;
     }
 
     public String getPicture()
@@ -99,5 +101,13 @@ public class UserFacebookPost
 
     public void setmProfileImage(String mProfileImage) {
         this.mProfileImage = mProfileImage;
+    }
+
+    public FBReactions getmReactions() {
+        return mReactions;
+    }
+
+    public void setmReactions(FBReactions mReactions) {
+        this.mReactions = mReactions;
     }
 }

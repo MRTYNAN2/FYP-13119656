@@ -1,11 +1,13 @@
 package com.fyp.rory.fyp.Activitys;
 
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.GraphRequest;
@@ -29,6 +31,11 @@ public class User_Post_by_Graph extends AppCompatActivity {
         Button post = (Button)findViewById(R.id.post_button);
         messageText = (EditText)findViewById(R.id.postMessageText);
 
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.hide();
+        }
+
         post.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -43,7 +50,7 @@ public class User_Post_by_Graph extends AppCompatActivity {
 
     public void postUsingGraph(String postMessage){
         Bundle params = new Bundle();
-        params.putString("message", "This is a test message");
+        params.putString("message", postMessage);
         /* make the API call */
         new GraphRequest(
                 AccessToken.getCurrentAccessToken(),
@@ -52,8 +59,10 @@ public class User_Post_by_Graph extends AppCompatActivity {
                 HttpMethod.POST,
                 new GraphRequest.Callback() {
                     public void onCompleted(GraphResponse response) {
-                        Log.d("FBPOST","POst Sucessful");
+                        Log.d("FBPOST","Post Sucessful");
                         messageText.setText("");
+                        Toast.makeText(User_Post_by_Graph.this, "Post written to your Wall.",
+                                Toast.LENGTH_LONG).show();
                     }
                 }
         ).executeAsync();

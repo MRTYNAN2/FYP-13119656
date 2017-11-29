@@ -25,6 +25,7 @@ import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
 import com.fyp.rory.fyp.Adapters.UserFacebookAdapter;
+import com.fyp.rory.fyp.Models.FBReactions;
 import com.fyp.rory.fyp.Models.FriendList;
 import com.fyp.rory.fyp.Models.UserFacebookPost;
 import com.fyp.rory.fyp.Models.UserFriendsID;
@@ -89,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
                 if (editable.toString().equalsIgnoreCase("")){
                     mRecyclerAdapter.updateDataset(updates);
                 } else {
-                    specificSearch(searchBar.getText().toString());
+                    //specificSearch(searchBar.getText().toString());
                 }
             }
         });
@@ -117,7 +118,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String check =searchBar.getText().toString();
-                if (!check.equalsIgnoreCase("")){
+//                if (check.split("\\s+").length == 0){
+                    if (check.toLowerCase().equalsIgnoreCase("like") || check.toLowerCase().equalsIgnoreCase("likes")){
+                        reactionSearch("like");
+                    }
+//                    else {
+//                        specificSearch(searchBar.getText().toString());
+//                    }
+//                }
+                else if (!check.equalsIgnoreCase("")){
                     specificSearch(searchBar.getText().toString());
                 } else {
                     Toast.makeText(MainActivity.this, "Please enter text",
@@ -215,9 +224,33 @@ public class MainActivity extends AppCompatActivity {
                                             // if its to refresh the list we clear it
                                             for (JsonElement object : array) {
                                                 if (object != null && object.isJsonObject() && !object.isJsonNull()) {
+                                                    FBReactions reactionsItems = new FBReactions();
                                                     JsonObject obj = object.getAsJsonObject();
                                                     JsonElement id = obj.get("id");
                                                     JsonElement link;
+                                                    if (obj.has("reactions")){
+                                                        JsonObject reactionObj = obj.getAsJsonObject("reactions");
+                                                        if (reactionObj.has("data")) {
+                                                           JsonArray reactData = reactionObj.getAsJsonArray("data");
+                                                            for(int i =0 ; i < reactData.size();i++){
+                                                                JsonObject tempObj = reactData.get(i).getAsJsonObject();
+                                                                if (tempObj.get("type").getAsString().equalsIgnoreCase("WOW")){
+                                                                    reactionsItems.setFbWOW(true);
+                                                                } else if (tempObj.get("type").getAsString().equalsIgnoreCase("HAHA")){
+                                                                    reactionsItems.setFbHAHA(true);
+                                                                } else if (tempObj.get("type").getAsString().equalsIgnoreCase("LOVE")){
+                                                                    reactionsItems.setFbLOVE(true);
+                                                                } else if (tempObj.get("type").getAsString().equalsIgnoreCase("LIKE")){
+                                                                    reactionsItems.setFbLIKE(true);
+                                                                } else if (tempObj.get("type").getAsString().equalsIgnoreCase("SAD")){
+                                                                    reactionsItems.setFbSAD(true);
+                                                                }else if (tempObj.get("type").getAsString().equalsIgnoreCase("ANGERY")){
+                                                                    reactionsItems.setFbANGERY(true);
+                                                                }
+                                                            }
+                                                            Log.d("FBREACT", "Reations found");
+                                                        }
+                                                    }
                                                     if (obj.has("link")) {
                                                         link = obj.get("link");
                                                     } else {
@@ -244,17 +277,17 @@ public class MainActivity extends AppCompatActivity {
                                                     if (message != null && !message.isJsonNull() && message.getAsString() != null && !message.getAsString().isEmpty()
                                                             && createdTime != null && !createdTime.isJsonNull() && createdTime.getAsString() != null && !createdTime.getAsString().isEmpty()) {
                                                         if (fullPicture != null && video_source != null && link != null) {
-                                                            post = new UserFacebookPost(friendName,friendProfileUrl, id.getAsString(), link.getAsString(), fullPicture.getAsString(), message.getAsString(), createdTime.getAsString(), video_source.getAsString());
+                                                            post = new UserFacebookPost(friendName,friendProfileUrl, id.getAsString(), link.getAsString(), fullPicture.getAsString(), message.getAsString(), createdTime.getAsString(), video_source.getAsString(),reactionsItems);
                                                             myRef.child(testUserID).child(post.getmID()).setValue(post);
                                                             updates.add(post);
                                                         }
                                                         else if (fullPicture != null) {
-                                                            post = new UserFacebookPost(friendName,friendProfileUrl, id.getAsString(), link.getAsString(), fullPicture.getAsString(), message.getAsString(), createdTime.getAsString(), "null");
+                                                            post = new UserFacebookPost(friendName,friendProfileUrl, id.getAsString(), link.getAsString(), fullPicture.getAsString(), message.getAsString(), createdTime.getAsString(), "null",reactionsItems);
                                                             myRef.child(testUserID).child(post.getmID()).setValue(post);
                                                             updates.add(post);
                                                         }
                                                         else {
-                                                            post = new UserFacebookPost(friendName,friendProfileUrl, id.getAsString(), "noLink", "null", message.getAsString(), createdTime.getAsString(), "null");
+                                                            post = new UserFacebookPost(friendName,friendProfileUrl, id.getAsString(), "noLink", "null", message.getAsString(), createdTime.getAsString(), "null",reactionsItems);
                                                             myRef.child(testUserID).child(post.getmID()).setValue(post);
                                                             updates.add(post);
                                                           }
@@ -321,6 +354,63 @@ public class MainActivity extends AppCompatActivity {
                         UserFacebookPost post = zoneSnapshot.getValue(UserFacebookPost.class);
                         if (post.getMessage().toLowerCase().contains(s.toLowerCase())) {
                             wordsList.add(post);
+                        }
+                    }
+                    mRecyclerAdapter.updateDataset(wordsList);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    System.out.println("The read failed: " + databaseError.getCode());
+                }
+            });
+        }
+    }
+
+    private void reactionSearch(final String s) {
+        ArrayList<UserFriendsID> allFriends = FriendList.getInstance().getFriendsList();
+        for (int i = 0 ; i < allFriends.size(); i++) {
+            DatabaseReference ref = database.getReference("users/" + allFriends.get(i).getID());
+            wordsList.clear();
+            ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for (DataSnapshot zoneSnapshot : dataSnapshot.getChildren()) {
+                        UserFacebookPost post = zoneSnapshot.getValue(UserFacebookPost.class);
+                        FBReactions postReactions = post.getmReactions();
+                        switch (s) {
+                            case "like":
+                                if (postReactions.isFbLIKE()){
+                                    wordsList.add(post);
+                                }
+                                break;
+                            case "haha":
+                                if (postReactions.isFbHAHA()){
+                                    wordsList.add(post);
+                                }
+                                break;
+                            case "angery":
+                                if (postReactions.isFbANGERY()){
+                                    wordsList.add(post);
+                                }
+                                break;
+                            case "sad":
+                                if (postReactions.isFbSAD()){
+                                    wordsList.add(post);
+                                }
+                                break;
+                            case "love":
+                                if (postReactions.isFbLOVE()){
+                                    wordsList.add(post);
+                                }
+                                break;
+                            case "wow":
+                                if (postReactions.isFbLOVE()){
+                                    wordsList.add(post);
+                                }
+                                break;
+                            default:
+                                break;
                         }
                     }
                     mRecyclerAdapter.updateDataset(wordsList);
