@@ -16,6 +16,7 @@ import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.fyp.rory.fyp.R;
+import com.fyp.rory.fyp.Utilitys.FBPreferences;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -24,11 +25,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import java.util.Arrays;
 
 public class Login_Activity extends AppCompatActivity {
-
     private CallbackManager callbackManager;
     private FirebaseAuth mAuth;
     private ProgressBar prog;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,8 +58,6 @@ public class Login_Activity extends AppCompatActivity {
                             prog.setVisibility(View.GONE);
                             loginButton.setVisibility(View.VISIBLE);
                         }
-
-
                     }
                 });
 
@@ -70,9 +67,15 @@ public class Login_Activity extends AppCompatActivity {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 // App code
-                Intent mainIntent = new Intent(Login_Activity.this, MainActivity.class);
-                Login_Activity.this.startActivity(mainIntent);
-                finish();
+                if (FBPreferences.getInstance().getPref(Login_Activity.this)){
+                    Intent mainIntent = new Intent(Login_Activity.this, MainActivity.class);
+                    Login_Activity.this.startActivity(mainIntent);
+                    finish();
+                } else {
+                    Intent mainIntent = new Intent(Login_Activity.this, MainActivity.class);
+                    Login_Activity.this.startActivity(mainIntent);
+                    finish();
+                }
             }
 
             @Override
@@ -94,5 +97,4 @@ public class Login_Activity extends AppCompatActivity {
         callbackManager.onActivityResult(requestCode,
                 resultCode, data);
     }
-
 }

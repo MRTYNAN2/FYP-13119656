@@ -71,16 +71,19 @@
 
 
         <RelativeLayout
+            android:id="@+id/image_area"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="160dp"
             android:layout_margin="5dp"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:visibility="gone">
 
             <ImageView
                 android:id="@+id/fbThumbImgView"
                 android:layout_width="match_parent"
-                android:layout_height="160dp" />
+                android:layout_height="match_parent"
+                android:visibility="gone"/>
 
             <ImageView
                 android:id="@+id/play_icon"
@@ -88,9 +91,53 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:src="@drawable/play"
-                android:visibility="gone" />
+                android:visibility="gone"/>
 
         </RelativeLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/likes"
+                android:src = "@drawable/fb_like"
+                android:layout_weight="1"
+                android:layout_width="25dp"
+                android:layout_height="25dp" />
+
+            <ImageView
+                android:id="@+id/loves"
+                android:src = "@drawable/fb_love"
+                android:layout_weight="1"
+                android:layout_width="25dp"
+                android:layout_height="25dp" />
+            <ImageView
+                android:id="@+id/haha"
+                android:src = "@drawable/fb_haha"
+                android:layout_weight="1"
+                android:layout_width="25dp"
+                android:layout_height="25dp" />
+            <ImageView
+                android:id="@+id/wows"
+                android:src = "@drawable/fb_wow"
+                android:layout_weight="1"
+                android:layout_width="25dp"
+                android:layout_height="25dp" />
+            <ImageView
+                android:id="@+id/sads"
+                android:src = "@drawable/fb_saad"
+                android:layout_weight="1"
+                android:layout_width="25dp"
+                android:layout_height="25dp" />
+            <ImageView
+                android:id="@+id/angery"
+                android:src="@drawable/fb_angry"
+                android:layout_weight="1"
+                android:layout_width="25dp"
+                android:layout_height="25dp" />
+        </LinearLayout>
 
     </LinearLayout>
 

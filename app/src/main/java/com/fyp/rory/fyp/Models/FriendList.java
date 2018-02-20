@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 /**
  * Created by Rory on 04/11/2017.
+ * friends list singleton
  */
 
 public class FriendList {

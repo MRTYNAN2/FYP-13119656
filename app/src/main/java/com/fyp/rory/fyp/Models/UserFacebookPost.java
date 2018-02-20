@@ -12,14 +12,14 @@ public class UserFacebookPost
         this.mName = mName;
     }
 
-    private String mName;
+    private String mName = "";
     private String mProfileImage;
     private String mID;
-    private String mLink;
+    private String mLink = "";
     private String mPicture;
-    private String mMessage;
+    private String mMessage = "";
     private String mTimeCreated;
-    private String mVideoSource;
+    private String mVideoSource = "";
     private FBReactions mReactions;
 
     public UserFacebookPost(String name, String profileImage, String id, String link, String picture, String message, String timeCreated, String videoSoucre, FBReactions reactions)

@@ -1,5 +1,6 @@
 package com.fyp.rory.fyp.Adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -9,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.fyp.rory.fyp.Models.UserFacebookPost;
@@ -24,17 +26,9 @@ public class UserFacebookAdapter extends RecyclerView.Adapter<UserFacebookAdapte
     private static final String DEBUG_TAG = "FbAdapt";
     private Context mContext;
     private List<UserFacebookPost> mItems;
-    private String facebookName;
-    private String faceBookPageID;
 
     public UserFacebookAdapter(Context mContext) {
         this.mContext = mContext;
-    }
-
-    public UserFacebookAdapter(Context mContext, String clientPageName, String facebookPageID) {
-        this.mContext = mContext;
-        this.facebookName = clientPageName;
-        this.faceBookPageID = facebookPageID;
     }
 
     public void updateDataset(List<UserFacebookPost> data) {
@@ -49,9 +43,7 @@ public class UserFacebookAdapter extends RecyclerView.Adapter<UserFacebookAdapte
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View layoutView = LayoutInflater.from(mContext).inflate(R.layout.user_facebook_item_layout, parent, false);
 
-        ViewHolder vh = new ViewHolder(layoutView);
-
-        return vh;
+        return new ViewHolder(layoutView);
     }
 
     @Override
@@ -79,23 +71,22 @@ public class UserFacebookAdapter extends RecyclerView.Adapter<UserFacebookAdapte
             public void onClick(View v) {
                 if (holder.oMessageTextView.getMaxLines() <= 8) {
                     holder.oMessageTextView.setMaxLines(Integer.MAX_VALUE);
-                } else {
-                    //holder.oMessageTextView.setMaxLines(8);
                 }
             }
         });
 
         // if there is video source display play button. soucre is a raw link to video (In case need or implement video in future)
-        if (!post.getmVideoSoucre().equalsIgnoreCase("null")) {
+        if (!post.getmVideoSoucre().equalsIgnoreCase("")) {
             holder.oPlayIcon.setVisibility(View.VISIBLE);
         } else {
             holder.oPlayIcon.setVisibility(View.GONE);
 
         }
         // post without images are ignored but just in case. again simple on click on image to go to link.
-        if (!post.getPicture().equalsIgnoreCase("null")) {
+        if (!post.getPicture().equalsIgnoreCase("null")&& !post.getPicture().isEmpty()) {
+            holder.imageArea.setVisibility(View.VISIBLE);
+            holder.oImageView.setVisibility(View.VISIBLE);
             Picasso.with(mContext).load(post.getPicture()).fit().centerCrop().into(holder.oImageView);
-
             holder.oImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -107,13 +98,15 @@ public class UserFacebookAdapter extends RecyclerView.Adapter<UserFacebookAdapte
                 }
             });
         } else {
+            holder.imageArea.setVisibility(View.GONE);
             holder.oImageView.setVisibility(View.GONE);
         }
 
         // This is the format that we receive the date_created field
+        @SuppressLint("SimpleDateFormat")
         SimpleDateFormat facebookTimeCreatedFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
         //This is the format facebook displays dates on site "/" this is to be replaced with "at"
-        SimpleDateFormat outputDate = new SimpleDateFormat("d MMMM yyyy / HH:mm");
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat outputDate = new SimpleDateFormat("d MMMM yyyy / HH:mm");
         Date stringDate = null;
         try {
             stringDate = facebookTimeCreatedFormat.parse(post.getTimeCreated());
@@ -130,7 +123,7 @@ public class UserFacebookAdapter extends RecyclerView.Adapter<UserFacebookAdapte
         holder.oWrapper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!post.getLink().equalsIgnoreCase("nolink")) {
+                if (!post.getLink().equalsIgnoreCase("")) {
                     Intent i = new Intent(Intent.ACTION_VIEW);
                     i.setData(Uri.parse(post.getLink()));
                     mContext.startActivity(i);
@@ -138,6 +131,36 @@ public class UserFacebookAdapter extends RecyclerView.Adapter<UserFacebookAdapte
             }
         });
 
+        if(!post.getmReactions().isFbLIKE()){
+            holder.likes.setVisibility(View.GONE);
+        } else {
+            holder.likes.setVisibility(View.VISIBLE);
+        }
+        if(!post.getmReactions().isFbLOVE()){
+            holder.loves.setVisibility(View.GONE);
+        } else {
+            holder.loves.setVisibility(View.VISIBLE);
+        }
+        if(!post.getmReactions().isFbHAHA()){
+            holder.haha.setVisibility(View.GONE);
+        } else {
+            holder.haha.setVisibility(View.VISIBLE);
+        }
+        if(!post.getmReactions().isFbWOW()){
+            holder.wows.setVisibility(View.GONE);
+        } else {
+            holder.wows.setVisibility(View.VISIBLE);
+        }
+        if(!post.getmReactions().isFbSAD()){
+            holder.sad.setVisibility(View.GONE);
+        } else {
+            holder.sad.setVisibility(View.VISIBLE);
+        }
+        if(!post.getmReactions().isFbANGERY()){
+            holder.angry.setVisibility(View.GONE);
+        } else {
+            holder.angry.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -148,25 +171,33 @@ public class UserFacebookAdapter extends RecyclerView.Adapter<UserFacebookAdapte
         return mItems.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        public View oWrapper;
-        public TextView oMessageTextView;
-        public TextView oPageTitle;
-        public ImageView oImageView;
-        public TextView oDateTextView;
-        public ImageView oProfileImage;
-        public ImageView oPlayIcon;
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        View oWrapper;
+        TextView oMessageTextView;
+        TextView oPageTitle;
+        ImageView oImageView;
+        TextView oDateTextView;
+        ImageView oProfileImage;
+        ImageView oPlayIcon, likes, loves, wows, sad, angry, haha;
+        RelativeLayout imageArea;
 
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
 
             oWrapper = itemView.findViewById(R.id.fbItemWrapper);
-            oMessageTextView = (TextView) itemView.findViewById(R.id.fbMessageTextView);
-            oImageView = (ImageView) itemView.findViewById(R.id.fbThumbImgView);
-            oDateTextView = (TextView) itemView.findViewById(R.id.fbDateTextView);
-            oProfileImage = (ImageView) itemView.findViewById(R.id.profileImage);
-            oPageTitle = (TextView) itemView.findViewById(R.id.fbpageTitle);
-            oPlayIcon = (ImageView) itemView.findViewById(R.id.play_icon);
+            oMessageTextView = itemView.findViewById(R.id.fbMessageTextView);
+            oImageView = itemView.findViewById(R.id.fbThumbImgView);
+            oDateTextView = itemView.findViewById(R.id.fbDateTextView);
+            oProfileImage = itemView.findViewById(R.id.profileImage);
+            oPageTitle = itemView.findViewById(R.id.fbpageTitle);
+            oPlayIcon = itemView.findViewById(R.id.play_icon);
+            likes = itemView.findViewById(R.id.likes);
+            loves = itemView.findViewById(R.id.loves);
+            wows = itemView.findViewById(R.id.wows);
+            sad = itemView.findViewById(R.id.sads);
+            angry = itemView.findViewById(R.id.angery);
+            haha = itemView.findViewById(R.id.haha);
+            imageArea = itemView.findViewById(R.id.image_area);
         }
     }
 }

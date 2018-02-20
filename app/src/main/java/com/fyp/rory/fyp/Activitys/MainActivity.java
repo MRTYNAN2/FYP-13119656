@@ -1,5 +1,6 @@
 package com.fyp.rory.fyp.Activitys;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -13,68 +14,55 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.facebook.AccessToken;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
-import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
 import com.fyp.rory.fyp.Adapters.UserFacebookAdapter;
+import com.fyp.rory.fyp.FBActions.FBGetFriends;
+import com.fyp.rory.fyp.FBActions.GetPostsInit;
+import com.fyp.rory.fyp.FBActions.PostsUpdate;
 import com.fyp.rory.fyp.Models.FBReactions;
 import com.fyp.rory.fyp.Models.FriendList;
 import com.fyp.rory.fyp.Models.UserFacebookPost;
 import com.fyp.rory.fyp.Models.UserFriendsID;
 import com.fyp.rory.fyp.R;
+import com.fyp.rory.fyp.Utilitys.PostsSort;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button logout;
-
-    private List<UserFacebookPost> updates = new ArrayList<>();
-    private List<UserFriendsID> friendsList = new ArrayList<>();
-    private UserFacebookAdapter mRecyclerAdapter;
-    private RecyclerView mRecyclerView;
-
-    private String friendName = "";
-    private String friendProfileUrl = "";
-    private int testI = 0;
-    private String testUserID = "";
-
-    private FirebaseDatabase database;
-    private DatabaseReference myRef;
-
+    private static List<UserFacebookPost> updates = new ArrayList<>();
+    @SuppressLint("StaticFieldLeak")
+    private static UserFacebookAdapter mRecyclerAdapter;
+    private static FirebaseDatabase database;
     private EditText searchBar;
-    private Button search;
+    private static ProgressBar prog;
 
-    private String likesPostCalls =  "reactions.type(LIKE).limit(0).summary(1).as(like)?,reactions.type(LOVE).limit(0).summary(1).as(love)?,reactions.type(HAHA).limit(0).summary(1).as(haha)?,reactions.type(WOW).limit(0).summary(1).as(wow)?,reactions.type(SAD).limit(0).summary(1).as(sad)?,reactions.type(ANGRY).limit(0).summary(1).as(angry)";
-
+    // private String likesPostCalls =  "reactions.type(LIKE).limit(0).summary(1).as(like)?,reactions.type(LOVE).limit(0).summary(1).as(love)?,reactions.type(HAHA).limit(0).summary(1).as(haha)?,reactions.type(WOW).limit(0).summary(1).as(wow)?,reactions.type(SAD).limit(0).summary(1).as(sad)?,reactions.type(ANGRY).limit(0).summary(1).as(angry)";
     private List <UserFacebookPost> wordsList = new ArrayList<>();
-
     private static final int REQUEST_CODE = 1234;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        searchBar = (EditText) findViewById(R.id.searchbar);
+        prog = findViewById(R.id.progbar);
+        searchBar = findViewById(R.id.searchbar);
         searchBar.addTextChangedListener(new TextWatcher() {
 
             @Override
@@ -89,13 +77,14 @@ public class MainActivity extends AppCompatActivity {
             public void afterTextChanged(Editable editable) {
                 if (editable.toString().equalsIgnoreCase("")){
                     mRecyclerAdapter.updateDataset(updates);
-                } else {
-                    //specificSearch(searchBar.getText().toString());
                 }
+//                else {
+//                    //specificSearch(searchBar.getText().toString());
+//                }
             }
         });
 
-        Button speakButton = (Button) findViewById(R.id.voiceSearch);
+        Button speakButton = findViewById(R.id.voiceSearch);
         speakButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -110,10 +99,10 @@ public class MainActivity extends AppCompatActivity {
         if (activities.size() == 0)
         {
             speakButton.setEnabled(false);
-            speakButton.setText("Recognizer not present");
+            speakButton.setText(R.string.speach_text);
         }
 
-        search = (Button)findViewById(R.id.search);
+        Button search = findViewById(R.id.search);
         search.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -122,10 +111,21 @@ public class MainActivity extends AppCompatActivity {
                     if (check.toLowerCase().equalsIgnoreCase("like") || check.toLowerCase().equalsIgnoreCase("likes")){
                         reactionSearch("like");
                     }
-//                    else {
-//                        specificSearch(searchBar.getText().toString());
-//                    }
-//                }
+                    else if (check.toLowerCase().equalsIgnoreCase("haha") || check.toLowerCase().equalsIgnoreCase("funny")){
+                    reactionSearch("haha");
+                    }
+                    else if (check.toLowerCase().equalsIgnoreCase("angery") || check.toLowerCase().equalsIgnoreCase("mad")){
+                    reactionSearch("angery");
+                    }
+                    else if (check.toLowerCase().equalsIgnoreCase("sad") || check.toLowerCase().equalsIgnoreCase("cry")){
+                        reactionSearch("sad");
+                    }
+                    else if (check.toLowerCase().equalsIgnoreCase("love") || check.toLowerCase().equalsIgnoreCase("<3")){
+                        reactionSearch("love");
+                    }
+                    else if (check.toLowerCase().equalsIgnoreCase("wow") || check.toLowerCase().equalsIgnoreCase("omg")){
+                        reactionSearch("wow");
+                    }
                 else if (!check.equalsIgnoreCase("")){
                     specificSearch(searchBar.getText().toString());
                 } else {
@@ -136,14 +136,14 @@ public class MainActivity extends AppCompatActivity {
         });
 
         database = FirebaseDatabase.getInstance();
-        myRef = database.getReference("users");
+        //DatabaseReference myRef = database.getReference("users");
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.hide();
         }
 
-        Button postGraph = (Button)findViewById(R.id.post_button);
+        Button postGraph = findViewById(R.id.post_button);
         postGraph.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -152,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Button friends = (Button)findViewById(R.id.friendsList);
+        Button friends = findViewById(R.id.friendsList);
         friends.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mRecyclerView = (RecyclerView) findViewById(R.id.facebook_recycler_view);
+        RecyclerView mRecyclerView = findViewById(R.id.facebook_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL));
@@ -172,174 +172,62 @@ public class MainActivity extends AppCompatActivity {
 
         getFriends();
 
-        logout = (Button)findViewById(R.id.logout_button);
+        Button logout = findViewById(R.id.logout_button);
 
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 LoginManager.getInstance().logOut();
-                Intent mainIntent = new Intent(MainActivity.this, Login_Activity.class);
-                MainActivity.this.startActivity(mainIntent);
+                //Intent mainIntent = new Intent(MainActivity.this, Login_Activity.class);
+                //MainActivity.this.startActivity(mainIntent);
                 MainActivity.this.finish();
             }
         });
 
     }
 
+    public static void notifyFriendsListFinished(){
+        getFriendsPost();
+    }
 
+    public static void notifyPostsFinished(){
+        loadPosts();
+    }
 
-
-    public void getFriendsPost(){
-        friendsList = FriendList.getInstance().getFriendsList();
-        if (testI < friendsList.size()) {
-            friendName = friendsList.get(testI).getName();
-            friendProfileUrl = friendsList.get(testI).getProfileImage();
-            testUserID = "";
-            testUserID = friendsList.get(testI).getID();
-            new GraphRequest(
-                    AccessToken.getCurrentAccessToken(),
-                    "/"+friendsList.get(testI).getID()+"/posts?fields=link,full_picture,source,message,is_hidden,reactions,created_time&access_token=",
-                    null,
-                    HttpMethod.GET,
-                    new GraphRequest.Callback() {
-                        public void onCompleted(GraphResponse response) {
-            /* handle the result */
-                            if (response != null) {
-                                String responseStr = response.getJSONObject().toString();
-                                Log.d("FaceBook Post", responseStr);
-//                            responseStr = responseStr.replace("{Response:  \n" +
-//                                    "responseCode: 200, \n" +
-//                                    "graphObject:","");
-//                            responseStr = responseStr.replace(", error: null}","");
-                                if (response != null && !responseStr.isEmpty()) {
-                                    JsonParser parser = new JsonParser();
-                                    JsonElement element = parser.parse(responseStr);
-                                    if (element != null && element.isJsonObject() && !element.isJsonNull()) {
-                                        JsonObject data = element.getAsJsonObject();
-                                        JsonElement jsonArray = data.get("data");
-
-                                        if (jsonArray.isJsonArray() && !jsonArray.isJsonNull()) {
-                                            JsonArray array = jsonArray.getAsJsonArray();
-//                                        List<FacebookPost> updates = new ArrayList<>();
-                                            // if its to refresh the list we clear it
-                                            for (JsonElement object : array) {
-                                                if (object != null && object.isJsonObject() && !object.isJsonNull()) {
-                                                    FBReactions reactionsItems = new FBReactions();
-                                                    JsonObject obj = object.getAsJsonObject();
-                                                    JsonElement id = obj.get("id");
-                                                    JsonElement link;
-                                                    if (obj.has("reactions")){
-                                                        JsonObject reactionObj = obj.getAsJsonObject("reactions");
-                                                        if (reactionObj.has("data")) {
-                                                           JsonArray reactData = reactionObj.getAsJsonArray("data");
-                                                            for(int i =0 ; i < reactData.size();i++){
-                                                                JsonObject tempObj = reactData.get(i).getAsJsonObject();
-                                                                if (tempObj.get("type").getAsString().equalsIgnoreCase("WOW")){
-                                                                    reactionsItems.setFbWOW(true);
-                                                                } else if (tempObj.get("type").getAsString().equalsIgnoreCase("HAHA")){
-                                                                    reactionsItems.setFbHAHA(true);
-                                                                } else if (tempObj.get("type").getAsString().equalsIgnoreCase("LOVE")){
-                                                                    reactionsItems.setFbLOVE(true);
-                                                                } else if (tempObj.get("type").getAsString().equalsIgnoreCase("LIKE")){
-                                                                    reactionsItems.setFbLIKE(true);
-                                                                } else if (tempObj.get("type").getAsString().equalsIgnoreCase("SAD")){
-                                                                    reactionsItems.setFbSAD(true);
-                                                                }else if (tempObj.get("type").getAsString().equalsIgnoreCase("ANGERY")){
-                                                                    reactionsItems.setFbANGERY(true);
-                                                                }
-                                                            }
-                                                            Log.d("FBREACT", "Reations found");
-                                                        }
-                                                    }
-                                                    if (obj.has("link")) {
-                                                        link = obj.get("link");
-                                                    } else {
-                                                        link = null;
-                                                    }
-                                                    JsonElement fullPicture;
-                                                    if (obj.has("full_picture")) {
-                                                        fullPicture = obj.get("full_picture");
-                                                    } else {
-                                                        fullPicture = null;
-                                                    }
-                                                    JsonElement message = obj.get("message");
-                                                    JsonElement createdTime = obj.get("created_time");
-                                                    JsonElement video_source = null;
-                                                    // source returns a raw url of a video in a post. If a post does not have a video nothing is returns for source
-                                                    if (obj.has("source")) {
-                                                        video_source = obj.get("source");
-                                                        Log.d("FBook Src:", video_source.getAsString() + " - " + link.getAsString());
-                                                    } else {
-                                                        video_source = null;
-                                                    }
-
-                                                    UserFacebookPost post;
-                                                    if (message != null && !message.isJsonNull() && message.getAsString() != null && !message.getAsString().isEmpty()
-                                                            && createdTime != null && !createdTime.isJsonNull() && createdTime.getAsString() != null && !createdTime.getAsString().isEmpty()) {
-                                                        if (fullPicture != null && video_source != null && link != null) {
-                                                            post = new UserFacebookPost(friendName,friendProfileUrl, id.getAsString(), link.getAsString(), fullPicture.getAsString(), message.getAsString(), createdTime.getAsString(), video_source.getAsString(),reactionsItems);
-                                                            myRef.child(testUserID).child(post.getmID()).setValue(post);
-                                                            updates.add(post);
-                                                        }
-                                                        else if (fullPicture != null) {
-                                                            post = new UserFacebookPost(friendName,friendProfileUrl, id.getAsString(), link.getAsString(), fullPicture.getAsString(), message.getAsString(), createdTime.getAsString(), "null",reactionsItems);
-                                                            myRef.child(testUserID).child(post.getmID()).setValue(post);
-                                                            updates.add(post);
-                                                        }
-                                                        else {
-                                                            post = new UserFacebookPost(friendName,friendProfileUrl, id.getAsString(), "noLink", "null", message.getAsString(), createdTime.getAsString(), "null",reactionsItems);
-                                                            myRef.child(testUserID).child(post.getmID()).setValue(post);
-                                                            updates.add(post);
-                                                          }
-                                                        }
-                                                }
-                                            }
-                                            mRecyclerAdapter.updateDataset(updates);
-                                        }
-                                    }
-                                }
-                            }
-                            testI++;
-                            getFriendsPost();
-                        }
+    public static void loadPosts(){
+        ArrayList<UserFriendsID> allFriends = FriendList.getInstance().getFriendsList();
+        for (int i = 0 ; i < allFriends.size(); i++) {
+            updates.clear();
+            DatabaseReference ref = database.getReference("users/" + allFriends.get(i).getID());
+            ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for (DataSnapshot zoneSnapshot : dataSnapshot.getChildren()) {
+                        UserFacebookPost post = zoneSnapshot.getValue(UserFacebookPost.class);
+                        updates.add(post);
+                        Collections.sort(updates,new PostsSort());
                     }
-            ).executeAsync();
+                    Collections.sort(updates,new PostsSort());
+                    mRecyclerAdapter.updateDataset(updates);
+                    prog.setVisibility(View.GONE);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    System.out.println("The read failed: " + databaseError.getCode());
+                }
+            });
         }
     }
 
-    public void getFriends (){
-                new GraphRequest(
-                AccessToken.getCurrentAccessToken(),"/me/friends?",null,HttpMethod.GET,new GraphRequest.Callback(){
-            @Override
-            public void onCompleted(GraphResponse response) {
-                if (response != null) {
-                    String responseStr = response.getJSONObject().toString();
-                    JsonParser parser = new JsonParser();
-                    JsonElement element = parser.parse(responseStr);
-                    if (element != null && element.isJsonObject() && !element.isJsonNull()) {
-                        JsonObject data = element.getAsJsonObject();
-                        JsonElement jsonArray = data.get("data");
-                        if (jsonArray.isJsonArray() && !jsonArray.isJsonNull()) {
-                            JsonArray array = jsonArray.getAsJsonArray();
-                            for (JsonElement object : array) {
-                                if (object != null && object.isJsonObject() && !object.isJsonNull()) {
-                                    JsonObject obj = object.getAsJsonObject();
-                                    JsonElement id = obj.get("id");
-                                    JsonElement name = obj.get("name");
+    public static void getFriendsPost(){
+        PostsUpdate friendsPost = new PostsUpdate();
+        friendsPost.getPosts();
+    }
 
-                                    UserFriendsID friend = new UserFriendsID(id.getAsString(),name.getAsString());
-                                    FriendList.getInstance().addUser(friend);
-                                    //friendsList.add(friend);
-                                }
-                            }
-                        }
-                        getFriendsPost();
-                    }
-
-                }
-            }
-        }
-        ).executeAsync();
+    public void getFriends(){
+        FBGetFriends yourFriends = new FBGetFriends();
+        yourFriends.getAllFriends(MainActivity.this);
     }
 
     private void specificSearch(final String s) {
@@ -352,7 +240,22 @@ public class MainActivity extends AppCompatActivity {
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     for (DataSnapshot zoneSnapshot : dataSnapshot.getChildren()) {
                         UserFacebookPost post = zoneSnapshot.getValue(UserFacebookPost.class);
+                        // This is the format that we receive the date_created field
+                        @SuppressLint("SimpleDateFormat")
+                        SimpleDateFormat facebookTimeCreatedFormat = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");
+                        //This is the format facebook displays dates on site "/" this is to be replaced with "at"
+                        @SuppressLint("SimpleDateFormat") SimpleDateFormat outputDate = new SimpleDateFormat("d MMMM yyyy / HH:mm");
+                        Date stringDate = null;
+                        try {
+                            stringDate = facebookTimeCreatedFormat.parse(post.getTimeCreated());
+
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                        String finalDate = outputDate.format(stringDate);
                         if (post.getMessage().toLowerCase().contains(s.toLowerCase())) {
+                            wordsList.add(post);
+                        } else if(finalDate.toLowerCase().contains(s.toLowerCase())){
                             wordsList.add(post);
                         }
                     }
@@ -389,7 +292,7 @@ public class MainActivity extends AppCompatActivity {
                                     wordsList.add(post);
                                 }
                                 break;
-                            case "angery":
+                            case "angry":
                                 if (postReactions.isFbANGERY()){
                                     wordsList.add(post);
                                 }
@@ -445,12 +348,17 @@ public class MainActivity extends AppCompatActivity {
             // Populate the wordsList with the String values the recognition engine thought it heard
             ArrayList<String> matches = data.getStringArrayListExtra(
                     RecognizerIntent.EXTRA_RESULTS);
-            String test = "";
+            StringBuilder test = new StringBuilder();
             for (int i = 0 ; i < matches.size();i++){
-                test += matches.get(i)+" ";
+                test.append(matches.get(i)).append(" ");
             }
-            searchBar.setText(test);
+            searchBar.setText(test.toString());
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    public static void notifyNewUser() {
+        GetPostsInit initPosts = new GetPostsInit();
+        initPosts.getPosts();
     }
 }
