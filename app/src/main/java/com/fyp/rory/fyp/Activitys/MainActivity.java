@@ -30,7 +30,6 @@ import com.fyp.rory.fyp.Models.FriendList;
 import com.fyp.rory.fyp.Models.UserFacebookPost;
 import com.fyp.rory.fyp.Models.UserFriendsID;
 import com.fyp.rory.fyp.R;
-import com.fyp.rory.fyp.Utilitys.PostsSort;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -40,7 +39,6 @@ import com.google.firebase.database.ValueEventListener;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -199,15 +197,16 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0 ; i < allFriends.size(); i++) {
             updates.clear();
             DatabaseReference ref = database.getReference("users/" + allFriends.get(i).getID());
+            ref.limitToLast(15);
             ref.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     for (DataSnapshot zoneSnapshot : dataSnapshot.getChildren()) {
                         UserFacebookPost post = zoneSnapshot.getValue(UserFacebookPost.class);
                         updates.add(post);
-                        Collections.sort(updates,new PostsSort());
+                        //Collections.sort(updates,new PostsSort());
                     }
-                    Collections.sort(updates,new PostsSort());
+                    //Collections.sort(updates,new PostsSort());
                     mRecyclerAdapter.updateDataset(updates);
                     prog.setVisibility(View.GONE);
                 }
@@ -308,7 +307,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 break;
                             case "wow":
-                                if (postReactions.isFbLOVE()){
+                                if (postReactions.isFbWOW()){
                                     wordsList.add(post);
                                 }
                                 break;

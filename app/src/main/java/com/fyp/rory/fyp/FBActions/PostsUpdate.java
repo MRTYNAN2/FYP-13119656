@@ -67,7 +67,7 @@ public class PostsUpdate {
                 });
                 new GraphRequest(
                         AccessToken.getCurrentAccessToken(),
-                        "/"+friendsList.get(testI).getID()+"/posts?fields=link,full_picture,source,message,is_hidden,reactions,created_time&since="+before+"&&access_token=",
+                        "/"+friendsList.get(testI).getID()+"/posts?fields=link,full_picture,source,message,is_hidden,reactions,created_time&access_token=",
                         null,
                         HttpMethod.GET,
                         new GraphRequest.Callback() {
@@ -143,20 +143,26 @@ public class PostsUpdate {
                                                                 video_source = null;
                                                             }
 
-                                                            UserFacebookPost post;
-                                                            if (message != null && !message.isJsonNull() && message.getAsString() != null && !message.getAsString().isEmpty()
-                                                                    && createdTime != null && !createdTime.isJsonNull() && createdTime.getAsString() != null && !createdTime.getAsString().isEmpty()) {
-                                                                if (fullPicture != null && video_source != null && link != null) {
-                                                                    post = new UserFacebookPost(friendName, friendProfileUrl, id.getAsString(), link.getAsString(), fullPicture.getAsString(), message.getAsString(), createdTime.getAsString(), video_source.getAsString(), reactionsItems);
-                                                                    myRef.child(testUserID).child(post.getmID()).setValue(post);
-                                                                } else if (fullPicture != null) {
-                                                                    post = new UserFacebookPost(friendName, friendProfileUrl, id.getAsString(), link.getAsString(), fullPicture.getAsString(), message.getAsString(), createdTime.getAsString(), "null", reactionsItems);
-                                                                    myRef.child(testUserID).child(post.getmID()).setValue(post);
-                                                                } else {
-                                                                    post = new UserFacebookPost(friendName, friendProfileUrl, id.getAsString(), "noLink", "null", message.getAsString(), createdTime.getAsString(), "null", reactionsItems);
-                                                                    myRef.child(testUserID).child(post.getmID()).setValue(post);
-                                                                }
+                                                            before = createdTime.getAsString();
+                                                            UserFacebookPost post = new UserFacebookPost();
+                                                            post.setmName(friendName);
+                                                            post.setmProfileImage(friendProfileUrl);
+                                                            post.setmID(id.getAsString());
+                                                            if (link != null) {
+                                                                post.setLink(link.getAsString());
                                                             }
+                                                            if (fullPicture != null) {
+                                                                post.setPicture(fullPicture.getAsString());
+                                                            }
+                                                            if (message != null) {
+                                                                post.setMessage(message.getAsString());
+                                                            }
+                                                            post.setTimeCreated(createdTime.getAsString());
+                                                            if (video_source != null){
+                                                                post.setmVideoSoucre(video_source.getAsString());
+                                                            }
+                                                            post.setmReactions(reactionsItems);
+                                                            myRef.child(testUserID).child(post.getmID()).setValue(post);
                                                         }
                                                     }
                                                     //MainActivity.loadPosts();

@@ -15,11 +15,11 @@ public class UserFacebookPost
     private String mName = "";
     private String mProfileImage;
     private String mID;
-    private String mLink = "";
-    private String mPicture;
+    private String mLink = "noLink";
+    private String mPicture = "null";
     private String mMessage = "";
     private String mTimeCreated;
-    private String mVideoSource = "";
+    private String mVideoSource = "null";
     private FBReactions mReactions;
 
     public UserFacebookPost(String name, String profileImage, String id, String link, String picture, String message, String timeCreated, String videoSoucre, FBReactions reactions)

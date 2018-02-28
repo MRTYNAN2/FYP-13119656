@@ -23,13 +23,17 @@ public class FBPreferences {
 
     public void setPref(Context context){
             SharedPreferences.Editor editor = context.getSharedPreferences("FBUser", MODE_PRIVATE).edit();
-                editor.putString("init", "true");
-                editor.apply();
+                editor.putBoolean("init", true);
+                //editor.apply();
+                editor.commit();
     }
 
     public boolean getPref(Context context){
         SharedPreferences prefs = context.getSharedPreferences("FBUser", MODE_PRIVATE);
-        String firstTime = prefs.getString("init", null);
-        return firstTime != null;
+            boolean firstTime = prefs.getBoolean("init",false);
+            if (firstTime)
+                return true;
+            else
+                return false;
     }
 }

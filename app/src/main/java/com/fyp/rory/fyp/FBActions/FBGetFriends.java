@@ -58,7 +58,7 @@ public class FBGetFriends {
     }
 
     private void getFriends() {
-        if (FBPreferences.getInstance().getPref(context)) {
+        if (FBPreferences.getInstance().getPref(context) == true) {
             MainActivity.notifyFriendsListFinished();
         } else {
             MainActivity.notifyNewUser();

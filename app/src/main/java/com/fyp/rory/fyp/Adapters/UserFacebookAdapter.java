@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.fyp.rory.fyp.Models.UserFacebookPost;
 import com.fyp.rory.fyp.R;
+import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.text.ParseException;
@@ -76,7 +77,7 @@ public class UserFacebookAdapter extends RecyclerView.Adapter<UserFacebookAdapte
         });
 
         // if there is video source display play button. soucre is a raw link to video (In case need or implement video in future)
-        if (!post.getmVideoSoucre().equalsIgnoreCase("")) {
+        if (!post.getmVideoSoucre().equalsIgnoreCase("null")) {
             holder.oPlayIcon.setVisibility(View.VISIBLE);
         } else {
             holder.oPlayIcon.setVisibility(View.GONE);
@@ -86,7 +87,7 @@ public class UserFacebookAdapter extends RecyclerView.Adapter<UserFacebookAdapte
         if (!post.getPicture().equalsIgnoreCase("null")&& !post.getPicture().isEmpty()) {
             holder.imageArea.setVisibility(View.VISIBLE);
             holder.oImageView.setVisibility(View.VISIBLE);
-            Picasso.with(mContext).load(post.getPicture()).fit().centerCrop().into(holder.oImageView);
+            Picasso.with(mContext).load(post.getPicture()).fit().centerCrop().memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE).into(holder.oImageView);
             holder.oImageView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -123,7 +124,7 @@ public class UserFacebookAdapter extends RecyclerView.Adapter<UserFacebookAdapte
         holder.oWrapper.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!post.getLink().equalsIgnoreCase("")) {
+                if (!post.getLink().equalsIgnoreCase("noLink")) {
                     Intent i = new Intent(Intent.ACTION_VIEW);
                     i.setData(Uri.parse(post.getLink()));
                     mContext.startActivity(i);

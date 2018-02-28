@@ -121,6 +121,7 @@ public class Single_Friend_Search extends AppCompatActivity {
         friend = FriendList.getInstance().getSingleFriend(name);
         mDatabase = FirebaseDatabase.getInstance();
         DatabaseReference ref = mDatabase.getReference("users/"+friend.getID());
+        ref.limitToLast(15);
 
         // Attach a listener to read the data at our posts reference
         ref.addValueEventListener(new ValueEventListener() {
